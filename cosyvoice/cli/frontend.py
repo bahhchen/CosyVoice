@@ -66,8 +66,19 @@ class CosyVoiceFrontEnd:
             try:
                 from wetext import Normalizer as ZhNormalizer
                 from wetext import Normalizer as EnNormalizer
-                self.zh_tn_model = ZhNormalizer(remove_erhua=False)
-                self.en_tn_model = EnNormalizer()
+                ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+                self.zh_tn_model = ZhNormalizer(
+                    tagger_path=os.path.abspath(os.path.join(ROOT_DIR, "../../chh/modelscope/hub/pengzhendong/wetext/zh/tn/tagger.fst")),
+                    verbalizer_path=os.path.abspath(os.path.join(ROOT_DIR, "../../chh/modelscope/hub/pengzhendong/wetext/zh/tn/verbalizer.fst")),
+                    lang="zh",
+                    operator="tn",
+                    remove_erhua=False)
+                self.en_tn_model = EnNormalizer(
+                    tagger_path=os.path.abspath(os.path.join(ROOT_DIR, "../../chh/modelscope/hub/pengzhendong/wetext/en/tn/tagger.fst")),
+                    verbalizer_path=os.path.abspath(os.path.join(ROOT_DIR, "../../chh/modelscope/hub/pengzhendong/wetext/en/tn/verbalizer.fst")),
+                    lang="en",
+                    operator="tn"
+                )
                 self.text_frontend = 'wetext'
                 logging.info('use wetext frontend')
             except:

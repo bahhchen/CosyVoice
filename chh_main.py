@@ -4,6 +4,7 @@ from cosyvoice.cli.cosyvoice import AutoModel
 import torchaudio
 import torch
 import re
+import os
 
 g_prompts = {
     'ZL2_woman' :{
@@ -25,6 +26,12 @@ g_prompts = {
 
 def save_waves(filename, waves, sample_rate):
     
+    # 获取上级目录
+    dir_path = os.path.dirname(filename)
+    # 判断是否存在，不存在就创建
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
     # 在时间维拼接
     merged = torch.cat(waves, dim=1)
 
@@ -62,6 +69,7 @@ def inference_zero_shot(cosyvoice, txt_contents, prompts, dstwav):
         print("speaker_name:", speaker_name)
         # print("text:", text)
 
+        # instruct_list + cur_speaker['prompt_text']
         for i, j in enumerate(cosyvoice.inference_zero_shot(text, 
                                                             'You are a helpful assistant.<|endofprompt|>' + cur_speaker['prompt_text'],
                                                             cur_speaker['prompt_wav'], stream=False)):

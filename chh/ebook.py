@@ -2,9 +2,10 @@
 import os
 import re
 import mobi
-import shutil
+import ebooklib
 from ebooklib import epub
 from bs4 import BeautifulSoup
+import shutil
 
 
 # 定义垃圾文本的正则模式（可以根据需要扩展）
@@ -62,7 +63,6 @@ def normalize_punctuation(text: str) -> str:
 
     return text
 
-
 def read_epub(file_path):
     """解析 EPUB，按章节输出，返回 chapters 列表，每个元素为 (title, content)"""
     book = epub.read_epub(file_path)
@@ -72,33 +72,49 @@ def read_epub(file_path):
     current_chapter_title = None
     current_chapter_content = []
 
+    # EPUB 没有正文里的 TOC，这里 toc_texts 直接设为空集合即可
+    # toc_texts = set()
+
     for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
         soup = BeautifulSoup(item.get_body_content(), "html.parser")
 
-        # 删除分页标记或空标签
+        # 删除分页 / Kindle 残留
         for tag in soup.find_all(["hr", "mbp:pagebreak"]):
             tag.decompose()
 
         for tag in soup.find_all(["h1", "h2", "h3", "p"]):
-            text = tag.get_text(strip=True)
-            if not text:
-                continue
-            # 过滤目录或版权信息
-            if text.startswith("本书由") or text.startswith("Table of Contents"):
+            txt = tag.get_text(" ", strip=True)
+            if not txt:
                 continue
 
+            # 🔥 核心过滤逻辑（你要的那段）
+            if is_bad_text(txt):
+                continue
+            # if txt in toc_texts:
+            #     continue
+            if "Table of Contents" in txt:
+                continue
+            if txt.startswith("本书由"):
+                continue
+
+            # 章节切分
             if tag.name in ["h1", "h2"]:
-                # 遇到新章节时，先保存之前章节
+                # 保存上一章
                 if current_chapter_title or current_chapter_content:
-                    chapters.append((current_chapter_title, "\n".join(current_chapter_content)))
-                current_chapter_title = text
-                current_chapter_content = [text]  # 标题也放到内容里
-            else:
-                current_chapter_content.append(text)
+                    chapters.append(
+                        (current_chapter_title, "\n".join(current_chapter_content))
+                    )
 
-    # 保存最后一章
+                current_chapter_title = txt
+                current_chapter_content = [txt]  # 标题也放入正文
+            else:
+                current_chapter_content.append(txt)
+
+    # 最后一章
     if current_chapter_title or current_chapter_content:
-        chapters.append((current_chapter_title, "\n".join(current_chapter_content)))
+        chapters.append(
+            (current_chapter_title, "\n".join(current_chapter_content))
+        )
 
     # 输出示例
     for i, (title, content) in enumerate(chapters, start=1):
@@ -107,7 +123,6 @@ def read_epub(file_path):
         print("\n=========================\n")
 
     return chapters
-
 
 def read_mobi(file_path):
     """解析 MOBI，按目录锚点输出章节"""
@@ -238,6 +253,10 @@ def safe_filename(name: str) -> str:
 
 
 def to_txt(file_path, txt_dir):
+
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    file_path=os.path.abspath(os.path.join(ROOT_DIR, file_path))
+    txt_dir=os.path.abspath(os.path.join(ROOT_DIR, txt_dir))
     
     chapters = read_book(file_path)
     if not chapters:
@@ -249,8 +268,28 @@ def to_txt(file_path, txt_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     for i, (title, content) in enumerate(chapters, start=1):
+        # 标题为空
+        if not title or title == content:
+            continue
+        title = title.strip()
+        # 过滤目录 / 导航 / 地标页
+        if title in ("目录", "Landmarks"):
+            continue
+        # 英文目录 / 变体
+        if title.lower() in ("contents", "table of contents"):
+            continue
+        # 一些 EPUB 常见的无效章节
+        if title.startswith(("版权", "前言", "序", "致谢", "about", "copyright", "封底")):
+            continue
+        # 内容为空或过短
+        # if not content or len(content.strip()) < 20:
+        #     continue
+
+        # 替换文本
+        text = content.replace("○", "零")
+        
         safe_title = safe_filename(title)
-        segments = split_text_by_length(content)
+        segments = split_text_by_length(text)
         if len(segments) > 1:
             for j, p in enumerate(segments, 1):
                 txt_content = f"Speaker 1: 第 {i} 章 第 {j} 节 \n{p}"
@@ -261,7 +300,7 @@ def to_txt(file_path, txt_dir):
                     f.write(txt_content)
 
         else:
-            txt_content = f"Speaker 1: 第 {i} 章 {safe_title} \n{content}"
+            txt_content = f"Speaker 1: 第 {i} 章 {safe_title} \n{text}"
             txt_filename = f"{i:04d}.{filename}.{safe_title}"
 
             output_path = os.path.join(output_dir, f"{txt_filename}.txt")
@@ -270,4 +309,4 @@ def to_txt(file_path, txt_dir):
 
 # 示例调用
 if __name__ == "__main__":
-    to_txt("./demo/text_examples/时间回旋三部曲.mobi", "./demo/text_examples/")
+    to_txt("./books/1996 终极实验 - 罗伯特·索耶.epub", "./books/")

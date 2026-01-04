@@ -1,5 +1,27 @@
 
 
+# 卸载方式之前的python
+* 控制面板 / 设置 → 应用 → Python → 卸载
+## 会发生什么
+* ✅ **会删除 Python 安装目录**
+  例如：
+  ```
+  C:\Users\xxx\AppData\Local\Programs\Python\Python310
+  ```
+* ⚠️ **不一定删除用户级缓存和配置**
+  * `pip` 下载缓存：
+
+    ```
+    C:\Users\xxx\AppData\Local\pip\Cache
+    ```
+  * 有时残留：
+
+    ```
+    C:\Users\xxx\AppData\Roaming\Python
+    ```
+## 包会不会被删？
+* **不会删**：如果你所有包都装在这个 Python 目录的 `Lib\site-packages`
+
 # Miniconda3
 ## 一、下载安装包：
 **这是你要记住的地址：**
@@ -97,4 +119,17 @@ python -c "import whisper; print(whisper.__file__)"
 
 👉 **只要能打印路径，就 100% 成功**
 
----
+# 降级 ruamel.yaml
+这个报错**非常典型，而且不是你代码写错**，而是 **依赖版本不匹配** 导致的：
+> ❌ `AttributeError: 'Loader' object has no attribute 'max_depth'`
+
+## 一句话结论（先看）
+👉 **`hyperpyyaml` / `ruamel.yaml` 版本不兼容**
+CosyVoice 里用的 `load_hyperpyyaml`，在你当前环境下，底层 `yaml Loader` 没有 `max_depth` 这个属性。
+
+在你的 `cosyvoice` conda 环境里执行：
+```bash
+pip uninstall -y ruamel.yaml ruamel.yaml.clib
+pip install ruamel.yaml==0.17.21
+```
+然后再次运行
