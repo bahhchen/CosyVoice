@@ -159,7 +159,7 @@ conda create -n cosyvoice_env python=3.10 -y
 # 2️⃣ 激活环境
 conda activate cosyvoice_env
 
-# 3️⃣ 安装 PyTorch 2.9.1 + torchaudio 2.9.1 + torch-complex + CUDA 11.7
+# 3️⃣ 安装 PyTorch 2.9.1 + torchaudio 2.9.1 + torch-complex + CUDA 11.7   优先于项目安装 避免 libiomp5md.dll 报错
 # pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121 -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 pytorch-cuda=12.1 -c pytorch -c nvidia
 
@@ -168,6 +168,8 @@ conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 pytorch-cuda=
 
 # CUDA 版本不完整：从安装文件中找到 nvrtc-builtins64_121.dll 放到 system32中
 # https://developer.nvidia.com/cuda-12-1-0-download-archive
+
+# 报错 Initializing libiomp5md.dll, but found libiomp5md.dll already initialized
 ```
 
 ```bash

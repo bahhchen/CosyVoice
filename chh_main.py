@@ -140,13 +140,13 @@ def cosyvoice3_example():
 
     #     save_waves('./chh/output/时间回旋三部曲.wav', waves, cosyvoice.sample_rate)
 
-    txt_contents = [
-        'Speaker YM_woman: 波奇酱你搁这儿呢啊! 虽然不知道你咋整的, 我还是买了一裤兜子甜水呢! 卧槽! 撩了的吉他小妹儿! 喜多, 你怎么搁这儿呢?',
-        'Speaker YM_woman: 卧槽! 这谁啊?',
-        'Speaker ZL2_woman: 别整那些没用的了!',
-    ]
-    txt_contents = read_txt_speaker_paragraphs("./chh/books/1996 终极实验 - 罗伯特·索耶 - fix/0004.1996 终极实验 - 罗伯特·索耶.引子.txt")
-    inference_zero_shot(cosyvoice, txt_contents, g_prompts, './chh/output/2p_yayi.wav')
+    # txt_contents = [
+    #     'Speaker YM_woman: 波奇酱你搁这儿呢啊! 虽然不知道你咋整的, 我还是买了一裤兜子甜水呢! 卧槽! 撩了的吉他小妹儿! 喜多, 你怎么搁这儿呢?',
+    #     'Speaker YM_woman: 卧槽! 这谁啊?',
+    #     'Speaker ZL2_woman: 别整那些没用的了!',
+    # ]
+    txt_contents = read_txt_speaker_paragraphs("./chh/books/时间回旋三部曲/0088.时间回旋三部曲.第十四章 特克的故事.txt")
+    inference_zero_shot(cosyvoice, txt_contents, g_prompts, './chh/output/时间回旋三部曲/0088.时间回旋三部曲.第十四章 特克的故事.wav')
 
 def main():
     # cosyvoice_example()
