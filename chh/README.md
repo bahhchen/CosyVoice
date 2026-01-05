@@ -133,3 +133,39 @@ pip uninstall -y ruamel.yaml ruamel.yaml.clib
 pip install ruamel.yaml==0.17.21
 ```
 然后再次运行
+
+# 在 conda 里删除一个环境
+## 一、先看看有哪些环境（可选）
+```bash
+conda env list
+```
+
+## 二、删除指定环境（标准做法 ✅）
+```bash
+conda remove -n 环境名 --all
+```
+
+# 查看你当前系统支持的 CUDA 版本
+```bash
+# 查看对应关系
+# https://pytorch.org/get-started/previous-versions/
+
+# 打开 CMD / PowerShell：
+nvidia-smi
+
+# 1️⃣ 创建新环境（名字可自定义，这里用 cosyvoice_env）
+conda create -n cosyvoice_env python=3.10 -y
+
+# 2️⃣ 激活环境
+conda activate cosyvoice_env
+
+# 3️⃣ 安装 PyTorch 2.9.1 + torchaudio 2.9.1 + torch-complex + CUDA 11.7
+# pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121 -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 pytorch-cuda=12.1 -c pytorch -c nvidia
+
+# 4️⃣ 安装 torch-complex（纯 Python 包，不依赖 CUDA）
+# pip install torch-complex==0.4.4
+
+# CUDA 版本不完整：从安装文件中找到 nvrtc-builtins64_121.dll 放到 system32中
+# https://developer.nvidia.com/cuda-12-1-0-download-archive
+```
