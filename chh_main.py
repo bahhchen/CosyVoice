@@ -140,19 +140,24 @@ def cosyvoice3_example():
 
     #     save_waves('./chh/output/时间回旋三部曲.wav', waves, cosyvoice.sample_rate)
 
-    # txt_contents = [
-    #     'Speaker YM_woman: 波奇酱你搁这儿呢啊! 虽然不知道你咋整的, 我还是买了一裤兜子甜水呢! 卧槽! 撩了的吉他小妹儿! 喜多, 你怎么搁这儿呢?',
-    #     'Speaker YM_woman: 卧槽! 这谁啊?',
-    #     'Speaker ZL2_woman: 别整那些没用的了!',
-    # ]
-    txt_contents = read_txt_speaker_paragraphs("./chh/books/终极实验/0004.终极实验.引子.txt")
-    inference_zero_shot(cosyvoice, txt_contents, g_prompts, './chh/output/终极实验/0004.终极实验.引子.wav')
+    txt_contents = [
+        'Speaker bl_woman: 我知道你是谁，霍布森先生。我还知道你是博士，而不是医生。',
+        'Speaker zta_woman: 412房。但是她的医生已经吩咐过，只有直系亲属才能探访。',
+        'Speaker zyq_woman: 彼得·霍布森问。他是一位四十二岁的男人，高高瘦瘦，头发黑灰相间。',
+        'Speaker fbb_woman: 卧槽! 撩了的吉他小妹儿!',
+        'Speaker zly_woman: 卧槽! 这谁啊?',
+        # 'Speaker YM_woman: 波奇酱你搁这儿呢啊! 虽然不知道你咋整的, 我还是买了一裤兜子甜水呢! 卧槽! 撩了的吉他小妹儿! 喜多, 你怎么搁这儿呢?',
+        # 'Speaker dlrb_woman: 卧槽！别整那些没用的了!',
+        # 'Speaker st_man: 收到好友从远方寄来的生日礼物，那份意外的惊喜与深深的祝福让我心中充满了甜蜜的快乐，笑容如花儿般绽放。',
+        # 'Speaker xz_man: 很快，她找到了底特律亨利·福特医院进行的长达三年有关心搏停止病人的研究。插入他们血流的导管探测到，四分之一的被诊断为没有心跳的人实际上有心跳。',
+    ]
+    inference_zero_shot(cosyvoice, txt_contents, g_prompts, './chh/output/test.wav')
 
 def main():
     # cosyvoice_example()
     # cosyvoice2_example()
-    # cosyvoice3_example()
-    inference_book('./chh/books/终极实验/', './chh/output/终极实验/')
+    cosyvoice3_example()
+    # inference_book('./chh/books/终极实验/', './chh/output/终极实验/')
 
 
 if __name__ == '__main__':
