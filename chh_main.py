@@ -81,7 +81,7 @@ def initCosyVoice3():
 # 合成小说 
 def inference_book(txt_path, wav_path, chapter_idx = 0):
   
-    chapters = read_book(txt_path, wav_path, chapter_idx)
+    chapters = read_book(txt_path, wav_path, chapter_idx, 2)
     # 目录方式
     if len(chapters) < 1:
         return
@@ -141,6 +141,10 @@ def cosyvoice3_example():
     #     save_waves('./chh/output/时间回旋三部曲.wav', waves, cosyvoice.sample_rate)
 
     txt_contents = [
+        'Speaker wl_man: 我知道你是谁，霍布森先生。我还知道你是博士，而不是医生。',
+        'Speaker ldh_man: 412房。但是她的医生已经吩咐过，只有直系亲属才能探访。',
+        'Speaker hb_man: 彼得·霍布森问。他是一位四十二岁的男人，高高瘦瘦，头发黑灰相间。',
+        'Speaker zjl_man: 卧槽! 撩了的吉他小妹儿!',
         'Speaker bl_woman: 我知道你是谁，霍布森先生。我还知道你是博士，而不是医生。',
         'Speaker zta_woman: 412房。但是她的医生已经吩咐过，只有直系亲属才能探访。',
         'Speaker zyq_woman: 彼得·霍布森问。他是一位四十二岁的男人，高高瘦瘦，头发黑灰相间。',
@@ -156,8 +160,8 @@ def cosyvoice3_example():
 def main():
     # cosyvoice_example()
     # cosyvoice2_example()
-    cosyvoice3_example()
-    # inference_book('./chh/books/终极实验/', './chh/output/终极实验/')
+    # cosyvoice3_example()
+    inference_book('./chh/books/终极实验/', './chh/output/终极实验/')
 
 
 if __name__ == '__main__':
