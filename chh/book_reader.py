@@ -13,6 +13,8 @@ def read_txt_speaker_paragraphs(file_path):
         noSpeaker = []
         for line in f:
             line = line.strip()
+            if line == '---end---':
+                break
             if not line:
                 continue  # 忽略空行
 
