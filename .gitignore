@@ -50,3 +50,9 @@ pretrained_models/*
 *_pb2_grpc.py
 *_pb2.py
 *.tar
+
+# chh files
+chh/books/*
+chh/pretrained_models/*
+chh/modelscope/*
+chh/output/*

@@ -5,7 +5,10 @@ import torchaudio
 import torch
 import re
 import os
-from chh_prompts import prompts as g_prompts
+
+# from chh.ebook import split_text_by_length
+from chh.prompts import prompts as g_prompts
+from chh.book_reader import read_book, read_txt_speaker_paragraphs
 
 def save_waves(filename, waves, sample_rate):
     
@@ -43,9 +46,11 @@ def inference_zero_shot(cosyvoice, txt_contents, prompts, dstwav):
                 cur_speaker = prompts[speaker_name]
             else:
                 cur_speaker = def_speaker
+                speaker_name = prompts_key0
         else:
             text = txt
             cur_speaker = def_speaker
+            speaker_name = prompts_key0
 
         # print("speaker_name:", speaker_name)
         # print("text:", text)
@@ -53,7 +58,7 @@ def inference_zero_shot(cosyvoice, txt_contents, prompts, dstwav):
         # instruct_list + cur_speaker['prompt_text']
         for i, j in enumerate(cosyvoice.inference_zero_shot(text, 
                                                             'You are a helpful assistant.<|endofprompt|>' + cur_speaker['prompt_text'],
-                                                            cur_speaker['prompt_wav'], stream=False)):
+                                                            cur_speaker['prompt_wav'], zero_shot_spk_id=speaker_name, stream=False)):
             # torchaudio.save('./chh/output/时间回旋三部曲_{}.wav'.format(i), j['tts_speech'], cosyvoice.sample_rate)
             wav = j['tts_speech']
             # 保证 shape 是 [1, T]
@@ -64,42 +69,37 @@ def inference_zero_shot(cosyvoice, txt_contents, prompts, dstwav):
 
     save_waves(dstwav, waves, cosyvoice.sample_rate)   
 
-def read_txt_speaker_paragraphs(file_path):
-    """
-    读取 TXT 文件，将段落按 speaker 
-    """
-    paragraphs = []
-    speaker_pattern = re.compile(r'^Speaker\s*\S*:')  # 匹配 Speaker namexxx:
+def initCosyVoice3():
+    
+    cosyvoice = AutoModel(model_dir='chh/pretrained_models/Fun-CosyVoice3-0.5B')
+    # 增加缓存
+    for key, value in g_prompts.items():
+        cosyvoice.add_zero_shot_spk('You are a helpful assistant.<|endofprompt|>' + value['prompt_text'], value['prompt_wav'], key)
 
-    with open(file_path, "r", encoding="utf-8-sig") as f:
-        noSpeaker = []
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue  # 忽略空行
+    return cosyvoice
 
-            if speaker_pattern.match(line):
-                if len(noSpeaker) > 0:
-                    paragraphs.append("。".join(noSpeaker))
-                # 新段落
-                paragraphs.append(line)
-                noSpeaker = []
-            else:
-                noSpeaker.append(line)
+# 合成小说 
+def inference_book(txt_path, wav_path, chapter_idx = 0):
+  
+    chapters = read_book(txt_path, wav_path, chapter_idx)
+    # 目录方式
+    if len(chapters) < 1:
+        return
 
-        if len(noSpeaker) > 0:
-            paragraphs.append("。".join(noSpeaker))
+    model = initCosyVoice3()
 
-    return paragraphs
+    # 合成
+    for chapter in chapters:
+        inference_zero_shot(model, chapter['contents'], g_prompts, chapter['wav'])
 
 
 def cosyvoice3_example():
     """ CosyVoice3 Usage, check https://funaudiollm.github.io/cosyvoice3/ for more details
     """
-    cosyvoice = AutoModel(model_dir='chh/pretrained_models/Fun-CosyVoice3-0.5B')
-    prompt_wav = './chh/assets/zh-ZL2_woman.wav'
+    cosyvoice = initCosyVoice3()
+    # prompt_wav = './chh/assets/zh-ZL2_woman.wav'
     # prompt_text = '希望你以后能够做的比我还好呦。'
-    prompt_text = '也许你相亲过很多次，可是你有真心付出过吗？你有努力过吗？你一定以为物质就可以换来爱情是吧！你不如去买彩票好了！也许隔天中了奖就可以得到你想要的一切。'
+    # prompt_text = '也许你相亲过很多次，可是你有真心付出过吗？你有努力过吗？你一定以为物质就可以换来爱情是吧！你不如去买彩票好了！也许隔天中了奖就可以得到你想要的一切。'
     # zero_shot usage
     # for i, j in enumerate(cosyvoice.inference_zero_shot('八百标兵奔北坡，北坡炮兵并排跑，炮兵怕把标兵碰，标兵怕碰炮兵炮。', 'You are a helpful assistant.<|endofprompt|>' + prompt_text,
     #                                                     prompt_wav, stream=False)):
@@ -145,13 +145,14 @@ def cosyvoice3_example():
     #     'Speaker YM_woman: 卧槽! 这谁啊?',
     #     'Speaker ZL2_woman: 别整那些没用的了!',
     # ]
-    txt_contents = read_txt_speaker_paragraphs("./chh/books/时间回旋三部曲/0088.时间回旋三部曲.第十四章 特克的故事.txt")
-    inference_zero_shot(cosyvoice, txt_contents, g_prompts, './chh/output/时间回旋三部曲/0088.时间回旋三部曲.第十四章 特克的故事.wav')
+    txt_contents = read_txt_speaker_paragraphs("./chh/books/终极实验/0004.终极实验.引子.txt")
+    inference_zero_shot(cosyvoice, txt_contents, g_prompts, './chh/output/终极实验/0004.终极实验.引子.wav')
 
 def main():
     # cosyvoice_example()
     # cosyvoice2_example()
-    cosyvoice3_example()
+    # cosyvoice3_example()
+    inference_book('./chh/books/终极实验/', './chh/output/终极实验/')
 
 
 if __name__ == '__main__':
