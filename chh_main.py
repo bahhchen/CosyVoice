@@ -42,18 +42,20 @@ def inference_zero_shot(cosyvoice, txt_contents, prompts, dstwav):
         if m:
             speaker_name = m.group(1)   # namexxx
             text = m.group(2)           # 别整那些没用的了!
-            if speaker_name in prompts:
-                cur_speaker = prompts[speaker_name]
-            else:
-                cur_speaker = def_speaker
+            if speaker_name not in prompts:
+            #     cur_speaker = prompts[speaker_name]
+            # else:
+                # cur_speaker = def_speaker
                 speaker_name = prompts_key0
         else:
             text = txt
-            cur_speaker = def_speaker
+            # cur_speaker = def_speaker
             speaker_name = prompts_key0
 
         # print("speaker_name:", speaker_name)
         # print("text:", text)
+
+        cur_speaker = prompts['s_' + speaker_name] if len(text) <= 6 else prompts['l_' + speaker_name]
 
         # instruct_list + cur_speaker['prompt_text']
         for i, j in enumerate(cosyvoice.inference_zero_shot(text, 
@@ -79,9 +81,9 @@ def initCosyVoice3():
     return cosyvoice
 
 # 合成小说 
-def inference_book(txt_path, wav_path, chapter_idx = 0):
+def inference_book(txt_path, wav_path, chapter_idx = 0, end = '---end---'):
   
-    chapters = read_book(txt_path, wav_path, chapter_idx, 2)
+    chapters = read_book(txt_path, wav_path, chapter_idx, end)
     # 目录方式
     if len(chapters) < 1:
         return
@@ -150,10 +152,10 @@ def cosyvoice3_example():
         'Speaker zyq_woman: 彼得·霍布森问。他是一位四十二岁的男人，高高瘦瘦，头发黑灰相间。',
         'Speaker fbb_woman: 卧槽! 撩了的吉他小妹儿!',
         'Speaker zly_woman: 卧槽! 这谁啊?',
-        # 'Speaker YM_woman: 波奇酱你搁这儿呢啊! 虽然不知道你咋整的, 我还是买了一裤兜子甜水呢! 卧槽! 撩了的吉他小妹儿! 喜多, 你怎么搁这儿呢?',
-        # 'Speaker dlrb_woman: 卧槽！别整那些没用的了!',
-        # 'Speaker st_man: 收到好友从远方寄来的生日礼物，那份意外的惊喜与深深的祝福让我心中充满了甜蜜的快乐，笑容如花儿般绽放。',
-        # 'Speaker xz_man: 很快，她找到了底特律亨利·福特医院进行的长达三年有关心搏停止病人的研究。插入他们血流的导管探测到，四分之一的被诊断为没有心跳的人实际上有心跳。',
+        'Speaker YM_woman: 波奇酱你搁这儿呢啊! 虽然不知道你咋整的, 我还是买了一裤兜子甜水呢! 卧槽! 撩了的吉他小妹儿! 喜多, 你怎么搁这儿呢?',
+        'Speaker dlrb_woman: 卧槽！别整那些没用的了!',
+        'Speaker st_man: 收到好友从远方寄来的生日礼物，那份意外的惊喜与深深的祝福让我心中充满了甜蜜的快乐，笑容如花儿般绽放。',
+        'Speaker xz_man: 很快，她找到了底特律亨利·福特医院进行的长达三年有关心搏停止病人的研究。插入他们血流的导管探测到，四分之一的被诊断为没有心跳的人实际上有心跳。',
     ]
     inference_zero_shot(cosyvoice, txt_contents, g_prompts, './chh/output/test.wav')
 

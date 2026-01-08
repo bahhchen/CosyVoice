@@ -2,38 +2,81 @@
 import re
 import os
 
-def read_txt_speaker_paragraphs(file_path):
+
+# 中文标点 -> 英文标点映射
+punct_map = {
+    # '，': ',',
+    # '。': '.',
+    # '！': '!',
+    # '？': '?',
+    # '：': ':',
+    # '；': ';',
+    # '（': '(',
+    # '）': ')',
+    '【': '[',
+    '】': ']',
+    '·':'-'
+    # '“': '"',
+    # '”': '"',
+    # '‘': "'",
+    # '’': "'",
+    # '、': ',',
+    # '《': '<',
+    # '》': '>',
+}
+
+# 特殊情况: "——" 和 "…" 需要单独处理
+def normalize_punctuation(text: str) -> str:
+    # 先替换多字符标点
+    # text = text.replace("——", "--").replace("…", "...")
+    text = text.replace("……", "，")
+    text = text.replace("…", "，")
+    
+    # 单字符映射用 translate
+    # trans_table = str.maketrans(punct_map)
+    # text = text.translate(trans_table)
+
+    # 删除非中英文和数字的字符，替换为空格
+    # text = re.sub(r"[^\u4e00-\u9fa5a-zA-Z0-9\s\.,!?;:()\-—\"'<>]", " ", text)
+
+    return text
+
+def read_txt_speaker_paragraphs(file_path, end):
     """
     读取 TXT 文件，将段落按 speaker 
     """
     paragraphs = []
     speaker_pattern = re.compile(r'^Speaker\s*\S*:')  # 匹配 Speaker namexxx:
 
+    isend = False
     with open(file_path, "r", encoding="utf-8-sig") as f:
         noSpeaker = []
         for line in f:
             line = line.strip()
-            if line == '---end---':
+            if end and line == end:
+                isend = True
                 break
             if not line:
                 continue  # 忽略空行
 
-            if speaker_pattern.match(line):
+            nortext = normalize_punctuation(line)
+
+            if speaker_pattern.match(nortext):
                 if len(noSpeaker) > 0:
-                    paragraphs.append("。".join(noSpeaker))
+                    paragraphs.append(" ".join(noSpeaker))
                 # 新段落
-                paragraphs.append(line)
+                paragraphs.append(nortext)
                 noSpeaker = []
             else:
-                noSpeaker.append(line)
+                noSpeaker.append(nortext)
 
         if len(noSpeaker) > 0:
-            paragraphs.append("。".join(noSpeaker))
+            paragraphs.append(" ".join(noSpeaker))
 
-    return paragraphs
+    return paragraphs if ((not end) or isend) else None
 
 # 读取小说 
-def read_book(txt_path, wav_path, chapter = 0, chapter2 = 0xfffffff):
+def read_book(txt_path, wav_path, chapter = 0, end = None):
   
     books = []
 
@@ -43,8 +86,6 @@ def read_book(txt_path, wav_path, chapter = 0, chapter2 = 0xfffffff):
 
     filelist = os.listdir(txt_path)
     for i, file_name in enumerate(filelist):
-        if i >= chapter2:
-            break
         # print(f"文件名： {i}:{file_name}")
         if i < chapter:
             continue
@@ -55,7 +96,9 @@ def read_book(txt_path, wav_path, chapter = 0, chapter2 = 0xfffffff):
             continue
 
         txt_filename = os.path.join(txt_path, file_name)
-        txt_contents = read_txt_speaker_paragraphs(txt_filename)
+        txt_contents = read_txt_speaker_paragraphs(txt_filename, end)
+        if txt_contents == None:
+            break
         books.append({"contents": txt_contents, "wav": wav_filename})
 
     return books
