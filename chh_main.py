@@ -60,12 +60,14 @@ def inference_zero_shot(cosyvoice, txt_contents, prompts, dstwav, isprompt = Fal
             cur_speaker = prompts[speaker_name]
         else : 
             cur_speaker = prompts['l_' + speaker_name]#prompts['s_' + speaker_name] if len(text) <= 6 else prompts['l_' + speaker_name]
+            if len(text) <= 3:
+                text = "……" + text + "……" 
 
         # instruct_list + cur_speaker['prompt_text']
         for i, j in enumerate(cosyvoice.inference_zero_shot(text, 
                                                             'You are a helpful assistant.<|endofprompt|>' + cur_speaker['prompt_text'],
                                                             cur_speaker['prompt_wav'], zero_shot_spk_id=speaker_name, stream=False)):
-            # torchaudio.save('./chh/output/时间回旋三部曲_{}.wav'.format(i), j['tts_speech'], cosyvoice.sample_rate)
+            # torchaudio.save('./chh/output/test{}.wav'.format(i), j['tts_speech'], cosyvoice.sample_rate)
             wav = j['tts_speech']
             # 保证 shape 是 [1, T]
             if wav.dim() == 1:
@@ -176,21 +178,21 @@ def cosyvoice3_example():
 
     #     save_waves('./chh/output/时间回旋三部曲.wav', waves, cosyvoice.sample_rate)
 
-    if 0:
+    if 1:
         txt_contents = [
-            'Speaker wl_man: 我知道你是谁，霍布森先生。我还知道你是博士，而不是医生。',
-            'Speaker ldh_man: 412房。但是她的医生已经吩咐过，只有直系亲属才能探访。',
-            'Speaker hb_man: 彼得·霍布森问。他是一位四十二岁的男人，高高瘦瘦，头发黑灰相间。',
-            'Speaker zjl_man: 卧槽! 撩了的吉他小妹儿!',
-            'Speaker bl_woman: 我知道你是谁，霍布森先生。我还知道你是博士，而不是医生。',
-            'Speaker zta_woman: 412房。但是她的医生已经吩咐过，只有直系亲属才能探访。',
-            'Speaker zyq_woman: 彼得·霍布森问。他是一位四十二岁的男人，高高瘦瘦，头发黑灰相间。',
-            'Speaker fbb_woman: 卧槽! 撩了的吉他小妹儿!',
-            'Speaker zly_woman: 卧槽! 这谁啊?',
-            'Speaker YM_woman: 波奇酱你搁这儿呢啊! 虽然不知道你咋整的, 我还是买了一裤兜子甜水呢! 卧槽! 撩了的吉他小妹儿! 喜多, 你怎么搁这儿呢?',
-            'Speaker dlrb_woman: 卧槽！别整那些没用的了!',
-            'Speaker st_man: 收到好友从远方寄来的生日礼物，那份意外的惊喜与深深的祝福让我心中充满了甜蜜的快乐，笑容如花儿般绽放。',
-            'Speaker xz_man: 很快，她找到了底特律亨利·福特医院进行的长达三年有关心搏停止病人的研究。插入他们血流的导管探测到，四分之一的被诊断为没有心跳的人实际上有心跳。',
+            # 'Speaker wl_man: 于是，我说道：卧槽!',
+            # 'Speaker ldh_man: 于是，我说道：滚!',
+            # 'Speaker hb_man: 于是，我说道：是你',
+            # 'Speaker zjl_man: 于是，我说道：什么',
+            'Speaker bl_woman: ……走',
+            # 'Speaker zta_woman: 于是，我说道：什么!',
+            # 'Speaker zyq_woman: 于是，我说道：走!',
+            # 'Speaker fbb_woman: 卧槽! 撩了的吉他小妹儿!',
+            # 'Speaker zly_woman: 卧槽! 这谁啊?',
+            # 'Speaker YM_woman: 波奇酱你搁这儿呢啊! 虽然不知道你咋整的, 我还是买了一裤兜子甜水呢! 卧槽! 撩了的吉他小妹儿! 喜多, 你怎么搁这儿呢?',
+            # 'Speaker dlrb_woman: 卧槽！别整那些没用的了!',
+            # 'Speaker st_man: 收到好友从远方寄来的生日礼物，那份意外的惊喜与深深的祝福让我心中充满了甜蜜的快乐，笑容如花儿般绽放。',
+            # 'Speaker xz_man: 很快，她找到了底特律亨利·福特医院进行的长达三年有关心搏停止病人的研究。插入他们血流的导管探测到，四分之一的被诊断为没有心跳的人实际上有心跳。',
         ]
         inference_zero_shot(cosyvoice, txt_contents, g_prompts, './chh/output/test.wav')
     else:

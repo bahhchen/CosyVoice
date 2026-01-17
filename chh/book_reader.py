@@ -59,7 +59,7 @@ def read_txt_speaker_paragraphs(file_path, end):
             if not line:
                 continue  # 忽略空行
 
-            nortext = normalize_punctuation(line)
+            nortext = line#normalize_punctuation(line)
 
             if speaker_pattern.match(nortext):
                 if len(noSpeaker) > 0:
